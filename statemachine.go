@@ -1,10 +1,19 @@
 package stateswitch
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+)
 
 type StateMachine interface {
 	AddTransition(transitionType TransitionType, sourceState States, destinationState State, transition Transition, condition Condition)
 	Run(transitionType TransitionType, args TransitionArgs) error
+}
+
+func NewStateMachine(stateSwitchObj StateSwitch) *stateMachine {
+	return &stateMachine{
+		StateSwitchObj:  stateSwitchObj,
+		transitionRules: map[TransitionType]TransitionRules{},
+	}
 }
 
 type stateMachine struct {
@@ -20,7 +29,11 @@ func (sm *stateMachine) Run(transitionType TransitionType, args TransitionArgs) 
 
 	objState := sm.StateSwitchObj.State()
 	for _, tr := range transByType {
-		if tr.IsAllowedToRun(objState, args) {
+		allow, err := tr.IsAllowedToRun(objState, args)
+		if err != nil {
+			return err
+		}
+		if allow {
 			if err := tr.Transition(args); err != nil {
 				return err
 			}

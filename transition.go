@@ -10,11 +10,14 @@ type TransitionRule struct {
 	DestinationState State
 }
 
-func (tr TransitionRule) IsAllowedToRun(state State, args TransitionArgs) bool {
+func (tr TransitionRule) IsAllowedToRun(state State, args TransitionArgs) (bool, error) {
 	if tr.SourceStates.Contain(state) {
-		return tr.Condition == nil || tr.Condition(args)
+		if tr.Condition == nil {
+			return true, nil
+		}
+		return tr.Condition(args)
 	}
-	return false
+	return false, nil
 }
 
 type TransitionRules []TransitionRule
@@ -33,4 +36,4 @@ type TransitionArgs interface{}
 
 type Transition func(args TransitionArgs) error
 
-type Condition func(args TransitionArgs) bool
+type Condition func(args TransitionArgs) (bool, error)
