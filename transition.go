@@ -3,11 +3,11 @@ package stateswitch
 type TransitionType string
 
 type TransitionRule struct {
+	TransitionType   TransitionType
 	SourceStates     States
+	DestinationState State
 	Condition        Condition
 	Transition       Transition
-	TransitionType   TransitionType
-	DestinationState State
 }
 
 func (tr TransitionRule) IsAllowedToRun(state State, args TransitionArgs) (bool, error) {
