@@ -106,27 +106,27 @@ Our state machine is ready to run some logic!
 The only thing that state machine is need right now is to get a transition type and arguments, it will automatically select the logic that will be executed.
 
 ```go
-	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, 90); err != nil {
-		logrus.Error(err)
-	}
-	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, 50); err != nil {
-		logrus.Error(err)
-	}
-	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, 80); err != nil {
-		logrus.Error(err)
-	}
-	logrus.Infof("%+v", student)
-	if err := sm.Run("unknown transition", 50); err != nil {
-		logrus.Error(err)
-	}
-	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, "invalid args"); err != nil {
-		logrus.Error(err)
-	}
-	logrus.Infof("%+v", student)
+logrus.Infof("%+v", student)
+if err := sm.Run(TransitionTypeSetGrade, 90); err != nil {
+	logrus.Error(err)
+}
+logrus.Infof("%+v", student)
+if err := sm.Run(TransitionTypeSetGrade, 50); err != nil {
+	logrus.Error(err)
+}
+logrus.Infof("%+v", student)
+if err := sm.Run(TransitionTypeSetGrade, 80); err != nil {
+	logrus.Error(err)
+}
+logrus.Infof("%+v", student)
+if err := sm.Run("unknown transition", 50); err != nil {
+	logrus.Error(err)
+}
+logrus.Infof("%+v", student)
+if err := sm.Run(TransitionTypeSetGrade, "invalid args"); err != nil {
+	logrus.Error(err)
+}
+logrus.Infof("%+v", student)
 ```
 
 example of the output:
