@@ -27,7 +27,7 @@ func (s *Student) SetState(state stateswitch.State) error {
 	return nil
 }
 
-func (s *Student) State() stateswitch.State {
+func (s Student) State() stateswitch.State {
 	return stateswitch.State(s.Status)
 }
 
