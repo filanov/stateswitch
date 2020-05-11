@@ -5,10 +5,13 @@ import (
 )
 
 type StateMachine interface {
+	// AddTransition to state machine
 	AddTransition(rule TransitionRule)
+	// Run transition by type
 	Run(transitionType TransitionType, args TransitionArgs) error
 }
 
+// Create new default state machine
 func NewStateMachine(stateSwitchObj StateSwitch) *stateMachine {
 	return &stateMachine{
 		StateSwitchObj:  stateSwitchObj,
@@ -21,6 +24,7 @@ type stateMachine struct {
 	transitionRules map[TransitionType]TransitionRules
 }
 
+// Run transition by type, will search for the first transition that will pass a condition.
 func (sm *stateMachine) Run(transitionType TransitionType, args TransitionArgs) error {
 	transByType, ok := sm.transitionRules[transitionType]
 	if !ok {
@@ -46,6 +50,7 @@ func (sm *stateMachine) Run(transitionType TransitionType, args TransitionArgs) 
 		transitionType, sm.StateSwitchObj.State())
 }
 
+// AddTransition to state machine
 func (sm *stateMachine) AddTransition(rule TransitionRule) {
 	sm.transitionRules[rule.TransitionType] = append(sm.transitionRules[rule.TransitionType], rule)
 }
