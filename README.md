@@ -86,19 +86,19 @@ If none of the conditions will pass then state machone will return an error beca
 
 ```go
 sm.AddTransition(stateswitch.TransitionRule{
-	SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
-	Condition:        student.IsPassed,
-	Transition:       student.SetGrade,
-	TransitionType:   TransitionTypeSetGrade,
+    SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed}, 
+    Condition:        student.IsPassed, 
+    Transition:       student.SetGrade, 
+    TransitionType:   TransitionTypeSetGrade,
     DestinationState: StatePassed,
 })
 
 sm.AddTransition(stateswitch.TransitionRule{
-	TransitionType:   TransitionTypeSetGrade,
-	SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
-	DestinationState: StateFailed,
-	Condition:        student.IsFailed,
-	Transition:       student.SetGrade,
+    TransitionType:   TransitionTypeSetGrade, 
+    SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},  
+    DestinationState: StateFailed, 
+    Condition:        student.IsFailed, 
+    Transition:       student.SetGrade,
 })
 ```
 
