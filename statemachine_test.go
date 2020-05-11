@@ -100,12 +100,12 @@ var _ = Describe("Run", func() {
 		Expect(sw.state).Should(Equal(stateA))
 	})
 	It("run transition", func() {
-		sw.SetState(stateB)
+		Expect(sw.SetState(stateB)).ShouldNot(HaveOccurred())
 		Expect(sm.Run(ttBToC, nil)).ShouldNot(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateC))
 	})
 	It("transition error", func() {
-		sw.SetState(stateB)
+		Expect(sw.SetState(stateB)).ShouldNot(HaveOccurred())
 		Expect(sm.Run(ttBToA, nil)).Should(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateB))
 	})
