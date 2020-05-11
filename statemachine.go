@@ -5,7 +5,7 @@ import (
 )
 
 type StateMachine interface {
-	AddTransition(transitionType TransitionType, sourceState States, destinationState State, transition Transition, condition Condition)
+	AddTransition(rule TransitionRule)
 	Run(transitionType TransitionType, args TransitionArgs) error
 }
 
@@ -34,8 +34,10 @@ func (sm *stateMachine) Run(transitionType TransitionType, args TransitionArgs) 
 			return err
 		}
 		if allow {
-			if err := tr.Transition(args); err != nil {
-				return err
+			if tr.Transition != nil {
+				if err := tr.Transition(args); err != nil {
+					return err
+				}
 			}
 			return sm.StateSwitchObj.SetState(tr.DestinationState)
 		}
@@ -44,14 +46,6 @@ func (sm *stateMachine) Run(transitionType TransitionType, args TransitionArgs) 
 		transitionType, sm.StateSwitchObj.State())
 }
 
-func (sm *stateMachine) AddTransition(transitionType TransitionType, sourceState States, destinationState State, transition Transition, condition Condition) {
-	sm.transitionRules[transitionType] = append(sm.transitionRules[transitionType],
-		TransitionRule{
-			SourceStates:     sourceState,
-			Condition:        condition,
-			Transition:       transition,
-			DestinationState: destinationState,
-			TransitionType:   transitionType,
-		},
-	)
+func (sm *stateMachine) AddTransition(rule TransitionRule) {
+	sm.transitionRules[rule.TransitionType] = append(sm.transitionRules[rule.TransitionType], rule)
 }
