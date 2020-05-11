@@ -64,21 +64,21 @@ func main() {
 
 	sm := stateswitch.NewStateMachine(&student)
 
-	sm.AddTransition(
-		TransitionTypeSetGrade,
-		[]stateswitch.State{StatePending, StateFailed, StatePassed},
-		StatePassed,
-		student.SetGrade,
-		student.IsPassed,
-	)
+	sm.AddTransition(stateswitch.TransitionRule{
+		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
+		Condition:        student.IsPassed,
+		Transition:       student.SetGrade,
+		TransitionType:   TransitionTypeSetGrade,
+		DestinationState: StatePassed,
+	})
 
-	sm.AddTransition(
-		TransitionTypeSetGrade,
-		[]stateswitch.State{StatePending, StateFailed, StatePassed},
-		StateFailed,
-		student.SetGrade,
-		student.IsFailed,
-	)
+	sm.AddTransition(stateswitch.TransitionRule{
+		TransitionType:   TransitionTypeSetGrade,
+		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
+		DestinationState: StateFailed,
+		Condition:        student.IsFailed,
+		Transition:       student.SetGrade,
+	})
 
 	logrus.Infof("%+v", student)
 	if err := sm.Run(TransitionTypeSetGrade, 90); err != nil {
