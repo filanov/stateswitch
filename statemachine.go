@@ -47,7 +47,7 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 				return err
 			}
 			if tr.PostTransition != nil {
-				return tr.PostTransition(args)
+				return stateSwitch.RunTransition(tr.PostTransition, args)
 			}
 			return nil
 		}
