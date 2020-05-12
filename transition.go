@@ -13,12 +13,13 @@ type TransitionRule struct {
 
 // IsAllowedToRun validate if current state supported, after then check the condition,
 // if it pass then transition is a allowed. Nil condition is automatic approval.
-func (tr TransitionRule) IsAllowedToRun(state State, args TransitionArgs) (bool, error) {
+func (tr TransitionRule) IsAllowedToRun(stateSwitch StateSwitch, args TransitionArgs) (bool, error) {
+	state := stateSwitch.State()
 	if tr.SourceStates.Contain(state) {
 		if tr.Condition == nil {
 			return true, nil
 		}
-		return tr.Condition(args)
+		return stateSwitch.RunCondition(tr.Condition, args)
 	}
 	return false, nil
 }
@@ -40,8 +41,8 @@ type TransitionArgs interface{}
 
 // Transition is users business logic, should not set the state or return next state
 // If condition return true this function will be executed
-type Transition func(args TransitionArgs) error
+type Transition interface{}
 
 // Condition for the transition, transition will be executed only if this function return true
 // Can be nil, in this case it's considered as return true, nil
-type Condition func(args TransitionArgs) (bool, error)
+type Condition interface{}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/filanov/stateswitch"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -32,8 +33,28 @@ func (s *Student) SetState(state stateswitch.State) error {
 	return nil
 }
 
-func (s Student) State() stateswitch.State {
+func (s *Student) State() stateswitch.State {
 	return stateswitch.State(s.Status)
+}
+
+type ConditionFn  func (student *Student, args stateswitch.TransitionArgs) (bool, error)
+
+type TransitionFn func(student *Student, args stateswitch.TransitionArgs) error
+
+func (s *Student) RunCondition(ifn interface{}, args stateswitch.TransitionArgs) (bool, error) {
+	fn, ok := ifn.(ConditionFn)
+	if !ok {
+		return false, fmt.Errorf("Condition function type is not applicable ...")
+	}
+	return fn(s, args)
+}
+
+func (s *Student) RunTransition(ifn interface{}, args stateswitch.TransitionArgs) error {
+	fn, ok := ifn.(TransitionFn)
+	if !ok {
+		return fmt.Errorf("Transition function type is not applicable ...")
+	}
+	return fn(s, args)
 }
 
 // Define arguments for each transition
@@ -43,30 +64,30 @@ type SetGradeTransitionArgs struct {
 }
 
 // transition implementation
-func SetGradeTransition(args stateswitch.TransitionArgs) error {
-	params, ok := args.(*SetGradeTransitionArgs)
+func SetGradeTransition(s *Student, args stateswitch.TransitionArgs) error {
+	grade, ok := args.(int)
 	if !ok {
 		return errors.Errorf("invalid argument type for SetGrade transition")
 	}
-	params.student.Grade = params.grade
+	s.Grade = grade
 	return nil
 }
 
 // Pass condition
-func IsPassed(args stateswitch.TransitionArgs) (bool, error) {
-	params, ok := args.(*SetGradeTransitionArgs)
+func IsPassed(s *Student, args stateswitch.TransitionArgs) (bool, error) {
+	grade, ok := args.(int)
 	if !ok {
 		return false, errors.Errorf("invalid arguments for IsPassed condition")
 	}
-	if params.grade > 60 {
+	if grade > 60 {
 		return true, nil
 	}
 	return false, nil
 }
 
 // Failure condition
-func IsFailed(args stateswitch.TransitionArgs) (bool, error) {
-	reply, err := IsPassed(args)
+func IsFailed(s *Student, args stateswitch.TransitionArgs) (bool, error) {
+	reply, err := IsPassed(s, args)
 	return !reply, err
 }
 
@@ -82,30 +103,26 @@ func (stm *studentMachine) SetGrade(s *Student, grade int) error {
 	})
 }
 
-func NewStudentMachine() *studentMachine {
+func NewStudentMachine() stateswitch.StateMachine {
 	sm := stateswitch.NewStateMachine()
 
 	sm.AddTransition(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeSetGrade,
 		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
 		DestinationState: StatePassed,
-		Condition:        IsPassed,
-		Transition:       SetGradeTransition,
+		Condition:        ConditionFn(IsPassed),
+		Transition:       TransitionFn(SetGradeTransition),
 	})
 
 	sm.AddTransition(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeSetGrade,
 		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
 		DestinationState: StateFailed,
-		Condition:        IsFailed,
-		Transition:       SetGradeTransition,
+		Condition:        ConditionFn(IsFailed),
+		Transition:       TransitionFn(SetGradeTransition),
 	})
 
-	stm := &studentMachine{
-		sm: sm,
-	}
-
-	return stm
+	return sm
 }
 
 func main() {
@@ -116,15 +133,15 @@ func main() {
 
 	sm := NewStudentMachine()
 	logrus.Infof("%+v", student)
-	if err := sm.SetGrade(&student, 90); err != nil {
+	if err := sm.Run(TransitionTypeSetGrade, &student, 90); err != nil {
 		logrus.Error(err)
 	}
 	logrus.Infof("%+v", student)
-	if err := sm.SetGrade(&student, 50); err != nil {
+	if err := sm.Run(TransitionTypeSetGrade, &student, 50); err != nil {
 		logrus.Error(err)
 	}
 	logrus.Infof("%+v", student)
-	if err := sm.SetGrade(&student, 80); err != nil {
+	if err := sm.Run(TransitionTypeSetGrade, &student, 80); err != nil {
 		logrus.Error(err)
 	}
 	logrus.Infof("%+v", student)

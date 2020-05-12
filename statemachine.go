@@ -31,15 +31,14 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 	}
 
 	//objState := sm.StateSwitchObj.State()
-	objState := stateSwitch.State()
 	for _, tr := range transByType {
-		allow, err := tr.IsAllowedToRun(objState, args)
+		allow, err := tr.IsAllowedToRun(stateSwitch, args)
 		if err != nil {
 			return err
 		}
 		if allow {
 			if tr.Transition != nil {
-				if err := tr.Transition(args); err != nil {
+				if err := stateSwitch.RunTransition(tr.Transition, args); err != nil {
 					return err
 				}
 			}
