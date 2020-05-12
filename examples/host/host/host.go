@@ -1,6 +1,7 @@
 package host
 
 import (
+	"fmt"
 	"github.com/filanov/stateswitch"
 	"github.com/filanov/stateswitch/examples/host/hardware"
 	"github.com/filanov/stateswitch/examples/host/models"
@@ -16,6 +17,22 @@ func (i internalHost) State() stateswitch.State {
 func (i *internalHost) SetState(state stateswitch.State) error {
 	i.host.Status = string(state)
 	return nil
+}
+
+func (s *internalHost) RunCondition(ifn stateswitch.Condition, args stateswitch.TransitionArgs) (bool, error) {
+	fn, ok := ifn.(func (*internalHost, stateswitch.TransitionArgs) (bool, error))
+	if !ok {
+		return false, fmt.Errorf("Condition function type is not applicable ...")
+	}
+	return fn(s, args)
+}
+
+func (s *internalHost) RunTransition(ifn stateswitch.Transition, args stateswitch.TransitionArgs) error {
+	fn, ok := ifn.(func(*internalHost, stateswitch.TransitionArgs) error)
+	if !ok {
+		return fmt.Errorf("Transition function type is not applicable ...")
+	}
+	return fn(s, args)
 }
 
 type hostApi struct {
@@ -88,16 +105,11 @@ func New(db *gorm.DB, hwValidator hardware.Validator) API {
 }
 
 func (h *hostApi) Register(host *models.Host) error {
-	return h.sm.Run(TransitionTypeRegister, &internalHost{host}, &TransitionArgsRegister{
-		host: host,
-	})
+	return h.sm.Run(TransitionTypeRegister, &internalHost{host}, nil)
 }
 
 func (h *hostApi) SetHwInfo(host *models.Host, hw bool) error {
-	return h.sm.Run(TransitionTypeSetHwInfo, &internalHost{host}, &TransitionArgsSetHwInfo{
-		host:   host,
-		hwInfo: hw,
-	})
+	return h.sm.Run(TransitionTypeSetHwInfo, &internalHost{host}, hw)
 }
 
 func (h *hostApi) List() ([]*models.Host, error) {
