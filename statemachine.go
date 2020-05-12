@@ -12,26 +12,26 @@ type StateMachine interface {
 }
 
 // Create new default state machine
-func NewStateMachine(stateSwitchObj StateSwitch) *stateMachine {
+func NewStateMachine() *stateMachine {
 	return &stateMachine{
-		StateSwitchObj:  stateSwitchObj,
 		transitionRules: map[TransitionType]TransitionRules{},
 	}
 }
 
 type stateMachine struct {
-	StateSwitchObj  StateSwitch
+	//StateSwitchObj  StateSwitch
 	transitionRules map[TransitionType]TransitionRules
 }
 
 // Run transition by type, will search for the first transition that will pass a condition.
-func (sm *stateMachine) Run(transitionType TransitionType, args TransitionArgs) error {
+func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwitch, args TransitionArgs) error {
 	transByType, ok := sm.transitionRules[transitionType]
 	if !ok {
 		return errors.Errorf("no match for transition type %s", transitionType)
 	}
 
-	objState := sm.StateSwitchObj.State()
+	//objState := sm.StateSwitchObj.State()
+	objState := stateSwitch.State()
 	for _, tr := range transByType {
 		allow, err := tr.IsAllowedToRun(objState, args)
 		if err != nil {
@@ -43,11 +43,13 @@ func (sm *stateMachine) Run(transitionType TransitionType, args TransitionArgs) 
 					return err
 				}
 			}
-			return sm.StateSwitchObj.SetState(tr.DestinationState)
+			//return sm.StateSwitchObj.SetState(tr.DestinationState)
+			return stateSwitch.SetState(tr.DestinationState)
 		}
 	}
 	return errors.Errorf("no condition passed to run transition %s from state %s",
-		transitionType, sm.StateSwitchObj.State())
+		//transitionType, sm.StateSwitchObj.State())
+		transitionType, stateSwitch.State())
 }
 
 // AddTransition to state machine
