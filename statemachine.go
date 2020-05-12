@@ -8,7 +8,7 @@ type StateMachine interface {
 	// AddTransition to state machine
 	AddTransition(rule TransitionRule)
 	// Run transition by type
-	Run(transitionType TransitionType, args TransitionArgs) error
+	Run(transitionType TransitionType, stateSwitch StateSwitch, args TransitionArgs) error
 }
 
 // Create new default state machine

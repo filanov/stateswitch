@@ -16,11 +16,16 @@ const (
 	TransitionTypeSetGrade = "SetGrade"
 )
 
+// the model that need state machine will work on
 type Student struct {
 	ID     string
 	Grade  int
 	Status string
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// make sure the model implement stateswich.StateSwitch interface
+/////////////////////////////////////////////////////////////////////////////
 
 func (s *Student) SetState(state stateswitch.State) error {
 	s.Status = string(state)
@@ -31,12 +36,14 @@ func (s Student) State() stateswitch.State {
 	return stateswitch.State(s.Status)
 }
 
+// Define arguments for each transition
 type SetGradeTransitionArgs struct {
 	grade   int
 	student *Student
 }
 
-func SetGrade(args stateswitch.TransitionArgs) error {
+// transition implementation
+func SetGradeTransition(args stateswitch.TransitionArgs) error {
 	params, ok := args.(*SetGradeTransitionArgs)
 	if !ok {
 		return errors.Errorf("invalid argument type for SetGrade transition")
@@ -45,6 +52,7 @@ func SetGrade(args stateswitch.TransitionArgs) error {
 	return nil
 }
 
+// Pass condition
 func IsPassed(args stateswitch.TransitionArgs) (bool, error) {
 	params, ok := args.(*SetGradeTransitionArgs)
 	if !ok {
@@ -56,9 +64,48 @@ func IsPassed(args stateswitch.TransitionArgs) (bool, error) {
 	return false, nil
 }
 
+// Failure condition
 func IsFailed(args stateswitch.TransitionArgs) (bool, error) {
 	reply, err := IsPassed(args)
 	return !reply, err
+}
+
+// State machine wrapper
+type studentMachine struct {
+	sm stateswitch.StateMachine
+}
+
+func (stm *studentMachine) SetGrade(s *Student, grade int) error {
+	return stm.sm.Run(TransitionTypeSetGrade, s, &SetGradeTransitionArgs{
+		grade:   grade,
+		student: s,
+	})
+}
+
+func NewStudentMachine() *studentMachine {
+	sm := stateswitch.NewStateMachine()
+
+	sm.AddTransition(stateswitch.TransitionRule{
+		TransitionType:   TransitionTypeSetGrade,
+		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
+		DestinationState: StatePassed,
+		Condition:        IsPassed,
+		Transition:       SetGradeTransition,
+	})
+
+	sm.AddTransition(stateswitch.TransitionRule{
+		TransitionType:   TransitionTypeSetGrade,
+		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
+		DestinationState: StateFailed,
+		Condition:        IsFailed,
+		Transition:       SetGradeTransition,
+	})
+
+	stm := &studentMachine{
+		sm: sm,
+	}
+
+	return stm
 }
 
 func main() {
@@ -67,54 +114,17 @@ func main() {
 		Status: StatePending,
 	}
 
-	sm := stateswitch.NewStateMachine()
-
-	sm.AddTransition(stateswitch.TransitionRule{
-		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
-		Condition:        IsPassed,
-		Transition:       SetGrade,
-		TransitionType:   TransitionTypeSetGrade,
-		DestinationState: StatePassed,
-	})
-
-	sm.AddTransition(stateswitch.TransitionRule{
-		TransitionType:   TransitionTypeSetGrade,
-		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
-		DestinationState: StateFailed,
-		Condition:        IsFailed,
-		Transition:       SetGrade,
-	})
-
+	sm := NewStudentMachine()
 	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, &student, &SetGradeTransitionArgs{
-		grade:   90,
-		student: &student,
-	}); err != nil {
+	if err := sm.SetGrade(&student, 90); err != nil {
 		logrus.Error(err)
 	}
 	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, &student, &SetGradeTransitionArgs{
-		grade:   50,
-		student: &student,
-	}); err != nil {
+	if err := sm.SetGrade(&student, 50); err != nil {
 		logrus.Error(err)
 	}
 	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, &student, &SetGradeTransitionArgs{
-		grade:   80,
-		student: &student,
-	}); err != nil {
-		logrus.Error(err)
-	}
-	logrus.Infof("%+v", student)
-	if err := sm.Run("unknown transition", &student, &SetGradeTransitionArgs{
-		grade:   0,
-		student: &student,
-	}); err != nil {
-		logrus.Error(err)
-	}
-	logrus.Infof("%+v", student)
-	if err := sm.Run(TransitionTypeSetGrade, &student, "invalid args"); err != nil {
+	if err := sm.SetGrade(&student, 80); err != nil {
 		logrus.Error(err)
 	}
 	logrus.Infof("%+v", student)
