@@ -19,9 +19,8 @@ func (i *internalHost) SetState(state stateswitch.State) error {
 }
 
 type hostApi struct {
-	sm          stateswitch.StateMachine
-	db          *gorm.DB
-	hwValidator hardware.Validator
+	sm stateswitch.StateMachine
+	db *gorm.DB
 }
 
 const (
