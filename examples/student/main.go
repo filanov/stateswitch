@@ -64,7 +64,7 @@ type SetGradeTransitionArgs struct {
 }
 
 // transition implementation
-func SetGradeTransition(s *Student, args stateswitch.TransitionArgs) error {
+var SetGradeTransition TransitionFn = func(s *Student, args stateswitch.TransitionArgs) error {
 	grade, ok := args.(int)
 	if !ok {
 		return errors.Errorf("invalid argument type for SetGrade transition")
@@ -74,7 +74,7 @@ func SetGradeTransition(s *Student, args stateswitch.TransitionArgs) error {
 }
 
 // Pass condition
-func IsPassed(s *Student, args stateswitch.TransitionArgs) (bool, error) {
+var IsPassed ConditionFn = func(s *Student, args stateswitch.TransitionArgs) (bool, error) {
 	grade, ok := args.(int)
 	if !ok {
 		return false, errors.Errorf("invalid arguments for IsPassed condition")
@@ -86,21 +86,9 @@ func IsPassed(s *Student, args stateswitch.TransitionArgs) (bool, error) {
 }
 
 // Failure condition
-func IsFailed(s *Student, args stateswitch.TransitionArgs) (bool, error) {
+var IsFailed ConditionFn = func(s *Student, args stateswitch.TransitionArgs) (bool, error) {
 	reply, err := IsPassed(s, args)
 	return !reply, err
-}
-
-// State machine wrapper
-type studentMachine struct {
-	sm stateswitch.StateMachine
-}
-
-func (stm *studentMachine) SetGrade(s *Student, grade int) error {
-	return stm.sm.Run(TransitionTypeSetGrade, s, &SetGradeTransitionArgs{
-		grade:   grade,
-		student: s,
-	})
 }
 
 func NewStudentMachine() stateswitch.StateMachine {
@@ -110,16 +98,16 @@ func NewStudentMachine() stateswitch.StateMachine {
 		TransitionType:   TransitionTypeSetGrade,
 		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
 		DestinationState: StatePassed,
-		Condition:        ConditionFn(IsPassed),
-		Transition:       TransitionFn(SetGradeTransition),
+		Condition:        IsPassed,
+		Transition:       SetGradeTransition,
 	})
 
 	sm.AddTransition(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeSetGrade,
 		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
 		DestinationState: StateFailed,
-		Condition:        ConditionFn(IsFailed),
-		Transition:       TransitionFn(SetGradeTransition),
+		Condition:        IsFailed,
+		Transition:       SetGradeTransition,
 	})
 
 	return sm
