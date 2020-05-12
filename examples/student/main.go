@@ -37,34 +37,24 @@ func (s *Student) State() stateswitch.State {
 	return stateswitch.State(s.Status)
 }
 
-type ConditionFn  func (student *Student, args stateswitch.TransitionArgs) (bool, error)
-
-type TransitionFn func(student *Student, args stateswitch.TransitionArgs) error
-
-func (s *Student) RunCondition(ifn interface{}, args stateswitch.TransitionArgs) (bool, error) {
-	fn, ok := ifn.(ConditionFn)
+func (s *Student) RunCondition(ifn stateswitch.Condition, args stateswitch.TransitionArgs) (bool, error) {
+	fn, ok := ifn.(func (student *Student, args stateswitch.TransitionArgs) (bool, error))
 	if !ok {
 		return false, fmt.Errorf("Condition function type is not applicable ...")
 	}
 	return fn(s, args)
 }
 
-func (s *Student) RunTransition(ifn interface{}, args stateswitch.TransitionArgs) error {
-	fn, ok := ifn.(TransitionFn)
+func (s *Student) RunTransition(ifn stateswitch.Transition, args stateswitch.TransitionArgs) error {
+	fn, ok := ifn.(func(student *Student, args stateswitch.TransitionArgs) error)
 	if !ok {
 		return fmt.Errorf("Transition function type is not applicable ...")
 	}
 	return fn(s, args)
 }
 
-// Define arguments for each transition
-type SetGradeTransitionArgs struct {
-	grade   int
-	student *Student
-}
-
 // transition implementation
-var SetGradeTransition TransitionFn = func(s *Student, args stateswitch.TransitionArgs) error {
+func SetGradeTransition(s *Student, args stateswitch.TransitionArgs) error {
 	grade, ok := args.(int)
 	if !ok {
 		return errors.Errorf("invalid argument type for SetGrade transition")
@@ -74,7 +64,7 @@ var SetGradeTransition TransitionFn = func(s *Student, args stateswitch.Transiti
 }
 
 // Pass condition
-var IsPassed ConditionFn = func(s *Student, args stateswitch.TransitionArgs) (bool, error) {
+func IsPassed(s *Student, args stateswitch.TransitionArgs) (bool, error) {
 	grade, ok := args.(int)
 	if !ok {
 		return false, errors.Errorf("invalid arguments for IsPassed condition")
@@ -86,7 +76,7 @@ var IsPassed ConditionFn = func(s *Student, args stateswitch.TransitionArgs) (bo
 }
 
 // Failure condition
-var IsFailed ConditionFn = func(s *Student, args stateswitch.TransitionArgs) (bool, error) {
+func IsFailed(s *Student, args stateswitch.TransitionArgs) (bool, error) {
 	reply, err := IsPassed(s, args)
 	return !reply, err
 }
