@@ -8,7 +8,7 @@ import (
 
 var _ = Describe("AddTransition", func() {
 	It("AddTransition", func() {
-		sm := NewStateMachine(nil)
+		sm := NewStateMachine()
 
 		transitionType := TransitionType("TransitionType")
 		srcStates := States{"StateA", "StateB"}
@@ -40,12 +40,12 @@ var _ = Describe("AddTransition", func() {
 })
 
 var _ = Describe("Run", func() {
-	var sw swState
+	var sw *swState
 	var sm StateMachine
 
 	BeforeEach(func() {
-		sw = swState{state: stateA}
-		sm = NewStateMachine(&sw)
+		sw = &swState{state: stateA}
+		sm = NewStateMachine()
 		sm.AddTransition(TransitionRule{
 			TransitionType:   ttAToB,
 			SourceStates:     []State{stateA},
@@ -84,29 +84,29 @@ var _ = Describe("Run", func() {
 	})
 
 	It("success", func() {
-		Expect(sm.Run(ttAToB, nil)).ShouldNot(HaveOccurred())
+		Expect(sm.Run(ttAToB, sw, nil)).ShouldNot(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateB))
 	})
 	It("transition type not found", func() {
-		Expect(sm.Run("invalid transition type", nil)).Should(HaveOccurred())
+		Expect(sm.Run("invalid transition type", sw, nil)).Should(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateA))
 	})
 	It("transition not permitted", func() {
-		Expect(sm.Run(ttNotPermittedAToC, nil)).Should(HaveOccurred())
+		Expect(sm.Run(ttNotPermittedAToC, sw, nil)).Should(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateA))
 	})
 	It("condition error", func() {
-		Expect(sm.Run(ttConditionError, nil)).Should(HaveOccurred())
+		Expect(sm.Run(ttConditionError, sw, nil)).Should(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateA))
 	})
 	It("run transition", func() {
 		Expect(sw.SetState(stateB)).ShouldNot(HaveOccurred())
-		Expect(sm.Run(ttBToC, nil)).ShouldNot(HaveOccurred())
+		Expect(sm.Run(ttBToC, sw, nil)).ShouldNot(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateC))
 	})
 	It("transition error", func() {
 		Expect(sw.SetState(stateB)).ShouldNot(HaveOccurred())
-		Expect(sm.Run(ttBToA, nil)).Should(HaveOccurred())
+		Expect(sm.Run(ttBToA, sw, nil)).Should(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateB))
 	})
 })
