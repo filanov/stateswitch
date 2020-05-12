@@ -8,6 +8,7 @@ type TransitionRule struct {
 	DestinationState State
 	Condition        Condition
 	Transition       Transition
+	PostTransition   Transition
 }
 
 // IsAllowedToRun validate if current state supported, after then check the condition,

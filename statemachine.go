@@ -44,7 +44,13 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 				}
 			}
 			//return sm.StateSwitchObj.SetState(tr.DestinationState)
-			return stateSwitch.SetState(tr.DestinationState)
+			if err := stateSwitch.SetState(tr.DestinationState); err != nil {
+				return err
+			}
+			if tr.PostTransition != nil {
+				return tr.PostTransition(args)
+			}
+			return nil
 		}
 	}
 	return errors.Errorf("no condition passed to run transition %s from state %s",
