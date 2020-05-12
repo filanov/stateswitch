@@ -83,9 +83,8 @@ func New(db *gorm.DB, hwValidator hardware.Validator) API {
 		hwValidator: hwValidator,
 	}
 	return &hostApi{
-		db:          db,
-		hwValidator: hwValidator,
-		sm:          NewHostStateMachine(th),
+		db: db,
+		sm: NewHostStateMachine(th),
 	}
 }
 
@@ -100,8 +99,6 @@ func (h *hostApi) SetHwInfo(host *models.Host, hw bool) error {
 		host:   host,
 		hwInfo: hw,
 	})
-	//updates := map[string]interface{}{"status": host.Status, "hw_info": host.HwInfo}
-	//return h.db.Model(host).Where("id = ?", host.ID).Updates(updates).Error
 }
 
 func (h *hostApi) List() ([]*models.Host, error) {
