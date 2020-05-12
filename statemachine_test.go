@@ -1,6 +1,7 @@
 package stateswitch
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -137,4 +138,42 @@ func (s *swState) State() State {
 func (s *swState) SetState(state State) error {
 	s.state = state
 	return nil
+}
+
+func (s *swState) TrueCondition(args TransitionArgs) (bool, error) {
+	return true, nil
+}
+func (s *swState) FalseCondition(args TransitionArgs) (bool, error) {
+	return false, nil
+}
+func (s *swState) ErrorCondition(args TransitionArgs) (bool, error) {
+	return false, errors.Errorf("error")
+}
+
+func (s *swState) OkTransition(args TransitionArgs) error {
+	return nil
+}
+
+func (s *swState) ErrorTransition(args TransitionArgs) error {
+	return errors.Errorf("error")
+}
+
+type ConditionFn func (student *swState, args TransitionArgs) (bool, error)
+
+type TransitionFn func(student *swState, args TransitionArgs) error
+
+func (s *swState) RunCondition(ifn interface{}, args TransitionArgs) (bool, error) {
+	fn, ok := ifn.(ConditionFn)
+	if !ok {
+		return false, fmt.Errorf("Condition function type is not applicable ...")
+	}
+	return fn(s, args)
+}
+
+func (s *swState) RunTransition(ifn interface{}, args TransitionArgs) error {
+	fn, ok := ifn.(TransitionFn)
+	if !ok {
+		return fmt.Errorf("Transition function type is not applicable ...")
+	}
+	return fn(s, args)
 }
