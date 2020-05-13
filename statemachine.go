@@ -29,15 +29,14 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 		return errors.Errorf("no match for transition type %s", transitionType)
 	}
 
-	objState := stateSwitch.State()
 	for _, tr := range transByType {
-		allow, err := tr.IsAllowedToRun(objState, args)
+		allow, err := tr.IsAllowedToRun(stateSwitch, args)
 		if err != nil {
 			return err
 		}
 		if allow {
 			if tr.Transition != nil {
-				if err := tr.Transition(args); err != nil {
+				if err := tr.Transition(stateSwitch, args); err != nil {
 					return err
 				}
 			}
@@ -46,7 +45,7 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 				return err
 			}
 			if tr.PostTransition != nil {
-				return tr.PostTransition(args)
+				return tr.PostTransition(stateSwitch, args)
 			}
 			return nil
 		}

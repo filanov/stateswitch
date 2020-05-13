@@ -18,20 +18,23 @@ type transitionHandler struct {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 type TransitionArgsSetHwInfo struct {
-	host   *models.Host
 	hwInfo bool
 }
 
-func (th *transitionHandler) SetHwInfo(args stateswitch.TransitionArgs) error {
+func (th *transitionHandler) SetHwInfo(sw stateswitch.StateSwitch, args stateswitch.TransitionArgs) error {
+	sHost, ok := sw.(*stateHost)
+	if !ok {
+		return errors.Errorf("incompatible type of StateSwitch")
+	}
 	params, ok := args.(*TransitionArgsSetHwInfo)
 	if !ok {
 		return errors.Errorf("invalid argument")
 	}
-	params.host.HwInfo = &params.hwInfo
+	sHost.host.HwInfo = &params.hwInfo
 	return nil
 }
 
-func (th *transitionHandler) IsSufficient(args stateswitch.TransitionArgs) (bool, error) {
+func (th *transitionHandler) IsSufficient(_ stateswitch.StateSwitch, args stateswitch.TransitionArgs) (bool, error) {
 	params, ok := args.(*TransitionArgsSetHwInfo)
 	if !ok {
 		return false, errors.Errorf("invalid argument")
@@ -39,18 +42,18 @@ func (th *transitionHandler) IsSufficient(args stateswitch.TransitionArgs) (bool
 	return th.hwValidator.IsSufficient(params.hwInfo), nil
 }
 
-func (th *transitionHandler) IsInsufficient(args stateswitch.TransitionArgs) (bool, error) {
-	reply, err := th.IsSufficient(args)
+func (th *transitionHandler) IsInsufficient(sw stateswitch.StateSwitch, args stateswitch.TransitionArgs) (bool, error) {
+	reply, err := th.IsSufficient(sw, args)
 	return !reply, err
 }
 
-func (th *transitionHandler) PostSetHwInfo(args stateswitch.TransitionArgs) error {
-	params, ok := args.(*TransitionArgsSetHwInfo)
+func (th *transitionHandler) PostSetHwInfo(sw stateswitch.StateSwitch, _ stateswitch.TransitionArgs) error {
+	sHost, ok := sw.(*stateHost)
 	if !ok {
-		return errors.Errorf("invalid argument")
+		return errors.Errorf("incompatible type of StateSwitch")
 	}
-	updates := map[string]interface{}{"status": params.host.Status, "hw_info": params.host.HwInfo}
-	return th.db.Model(params.host).Where("id = ?", params.host.ID).Updates(updates).Error
+	updates := map[string]interface{}{"status": sHost.host.Status, "hw_info": sHost.host.HwInfo}
+	return th.db.Model(sHost.host).Where("id = ?", sHost.host.ID).Updates(updates).Error
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,19 +64,19 @@ type TransitionArgsRegister struct {
 	host *models.Host
 }
 
-func (th *transitionHandler) RegisterNew(args stateswitch.TransitionArgs) error {
-	params, ok := args.(*TransitionArgsRegister)
+func (th *transitionHandler) RegisterNew(sw stateswitch.StateSwitch, args stateswitch.TransitionArgs) error {
+	sHost, ok := sw.(*stateHost)
 	if !ok {
-		return errors.Errorf("invalid argument")
+		return errors.Errorf("incompatible type of StateSwitch")
 	}
-	return th.db.Create(params.host).Error
+	return th.db.Create(sHost.host).Error
 }
 
-func (th *transitionHandler) RegisterAgain(args stateswitch.TransitionArgs) error {
-	params, ok := args.(*TransitionArgsRegister)
+func (th *transitionHandler) RegisterAgain(sw stateswitch.StateSwitch, _ stateswitch.TransitionArgs) error {
+	sHost, ok := sw.(*stateHost)
 	if !ok {
-		return errors.Errorf("invalid argument")
+		return errors.Errorf("incompatible type of StateSwitch")
 	}
-	updates := map[string]interface{}{"status": params.host.Status, "hw_info": nil}
-	return th.db.Model(params.host).Where("id = ?", params.host.ID).Updates(updates).Error
+	updates := map[string]interface{}{"status": sHost.host.Status, "hw_info": nil}
+	return th.db.Model(sHost.host).Where("id = ?", sHost.host.ID).Updates(updates).Error
 }

@@ -7,14 +7,14 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type internalHost struct{ host *models.Host }
+type stateHost struct{ host *models.Host }
 
-func (i internalHost) State() stateswitch.State {
-	return stateswitch.State(i.host.Status)
+func (sh stateHost) State() stateswitch.State {
+	return stateswitch.State(sh.host.Status)
 }
 
-func (i *internalHost) SetState(state stateswitch.State) error {
-	i.host.Status = string(state)
+func (sh *stateHost) SetState(state stateswitch.State) error {
+	sh.host.Status = string(state)
 	return nil
 }
 
@@ -88,16 +88,11 @@ func New(db *gorm.DB, hwValidator hardware.Validator) API {
 }
 
 func (h *hostApi) Register(host *models.Host) error {
-	return h.sm.Run(TransitionTypeRegister, &internalHost{host}, &TransitionArgsRegister{
-		host: host,
-	})
+	return h.sm.Run(TransitionTypeRegister, &stateHost{host: host}, nil)
 }
 
 func (h *hostApi) SetHwInfo(host *models.Host, hw bool) error {
-	return h.sm.Run(TransitionTypeSetHwInfo, &internalHost{host}, &TransitionArgsSetHwInfo{
-		host:   host,
-		hwInfo: hw,
-	})
+	return h.sm.Run(TransitionTypeSetHwInfo, &stateHost{host: host}, &TransitionArgsSetHwInfo{hwInfo: hw})
 }
 
 func (h *hostApi) List() ([]*models.Host, error) {

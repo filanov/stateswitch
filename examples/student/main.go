@@ -36,37 +36,35 @@ func (s Student) State() stateswitch.State {
 	return stateswitch.State(s.Status)
 }
 
-// Define arguments for each transition
-type SetGradeTransitionArgs struct {
-	grade   int
-	student *Student
-}
-
 // transition implementation
-func SetGradeTransition(args stateswitch.TransitionArgs) error {
-	params, ok := args.(*SetGradeTransitionArgs)
+func SetGradeTransition(sw stateswitch.StateSwitch, args stateswitch.TransitionArgs) error {
+	s, ok := sw.(*Student)
+	if !ok {
+		return errors.Errorf("StateSwitch object is not of type Student")
+	}
+	grade, ok := args.(int)
 	if !ok {
 		return errors.Errorf("invalid argument type for SetGrade transition")
 	}
-	params.student.Grade = params.grade
+	s.Grade = grade
 	return nil
 }
 
 // Pass condition
-func IsPassed(args stateswitch.TransitionArgs) (bool, error) {
-	params, ok := args.(*SetGradeTransitionArgs)
+func IsPassed(_ stateswitch.StateSwitch, args stateswitch.TransitionArgs) (bool, error) {
+	grade, ok := args.(int)
 	if !ok {
 		return false, errors.Errorf("invalid arguments for IsPassed condition")
 	}
-	if params.grade > 60 {
+	if grade > 60 {
 		return true, nil
 	}
 	return false, nil
 }
 
 // Failure condition
-func IsFailed(args stateswitch.TransitionArgs) (bool, error) {
-	reply, err := IsPassed(args)
+func IsFailed(sw stateswitch.StateSwitch, args stateswitch.TransitionArgs) (bool, error) {
+	reply, err := IsPassed(sw, args)
 	return !reply, err
 }
 
@@ -76,10 +74,7 @@ type studentMachine struct {
 }
 
 func (stm *studentMachine) SetGrade(s *Student, grade int) error {
-	return stm.sm.Run(TransitionTypeSetGrade, s, &SetGradeTransitionArgs{
-		grade:   grade,
-		student: s,
-	})
+	return stm.sm.Run(TransitionTypeSetGrade, s, grade)
 }
 
 func NewStudentMachine() *studentMachine {

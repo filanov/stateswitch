@@ -69,23 +69,25 @@ var _ = Describe("IsAllowedToRun", func() {
 		{
 			name:      "condition allow",
 			state:     srcStateA,
-			condition: func(args TransitionArgs) (bool, error) { return true, nil },
+			condition: func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return true, nil },
 			allow:     true,
 			fail:      false,
 		},
 		{
 			name:      "condition don't allow",
 			state:     srcStateA,
-			condition: func(args TransitionArgs) (bool, error) { return false, nil },
+			condition: func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return false, nil },
 			allow:     false,
 			fail:      false,
 		},
 		{
-			name:      "condition error",
-			state:     srcStateA,
-			condition: func(args TransitionArgs) (bool, error) { return false, errors.Errorf("error") },
-			allow:     false,
-			fail:      true,
+			name:  "condition error",
+			state: srcStateA,
+			condition: func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) {
+				return false, errors.Errorf("error")
+			},
+			allow: false,
+			fail:  true,
 		},
 	}
 
@@ -93,7 +95,7 @@ var _ = Describe("IsAllowedToRun", func() {
 		t := tests[i]
 		It(t.name, func() {
 			transition.Condition = t.condition
-			allow, err := transition.IsAllowedToRun(t.state, nil)
+			allow, err := transition.IsAllowedToRun(&swState{state: t.state}, nil)
 			Expect(allow).To(Equal(t.allow))
 			Expect(err == nil).Should(Equal(!t.fail))
 		})

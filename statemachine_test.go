@@ -13,10 +13,10 @@ var _ = Describe("AddTransition", func() {
 		transitionType := TransitionType("TransitionType")
 		srcStates := States{"StateA", "StateB"}
 		dstState := State("StateC")
-		transitionFunc := func(args TransitionArgs) error {
+		transitionFunc := func(stateSwitch StateSwitch, args TransitionArgs) error {
 			return nil
 		}
-		condition := func(args TransitionArgs) (bool, error) {
+		condition := func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) {
 			return true, nil
 		}
 
@@ -57,29 +57,29 @@ var _ = Describe("Run", func() {
 			TransitionType:   ttNotPermittedAToC,
 			SourceStates:     []State{stateA},
 			DestinationState: stateC,
-			Condition:        func(args TransitionArgs) (bool, error) { return false, nil },
+			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return false, nil },
 			Transition:       nil,
 		})
 		sm.AddTransition(TransitionRule{
 			TransitionType:   ttConditionError,
 			SourceStates:     []State{stateA, stateB},
 			DestinationState: stateC,
-			Condition:        func(args TransitionArgs) (bool, error) { return false, errors.Errorf("error") },
+			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return false, errors.Errorf("error") },
 			Transition:       nil,
 		})
 		sm.AddTransition(TransitionRule{
 			TransitionType:   ttBToC,
 			SourceStates:     []State{stateB},
 			DestinationState: stateC,
-			Condition:        func(args TransitionArgs) (bool, error) { return true, nil },
-			Transition:       func(args TransitionArgs) error { return nil },
+			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return true, nil },
+			Transition:       func(stateSwitch StateSwitch, args TransitionArgs) error { return nil },
 		})
 		sm.AddTransition(TransitionRule{
 			TransitionType:   ttBToA,
 			SourceStates:     []State{stateB},
 			DestinationState: stateA,
-			Condition:        func(args TransitionArgs) (bool, error) { return true, nil },
-			Transition:       func(args TransitionArgs) error { return errors.Errorf("error") },
+			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return true, nil },
+			Transition:       func(stateSwitch StateSwitch, args TransitionArgs) error { return errors.Errorf("error") },
 		})
 	})
 
