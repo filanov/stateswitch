@@ -19,7 +19,6 @@ func NewStateMachine() *stateMachine {
 }
 
 type stateMachine struct {
-	//StateSwitchObj  StateSwitch
 	transitionRules map[TransitionType]TransitionRules
 }
 
@@ -30,7 +29,6 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 		return errors.Errorf("no match for transition type %s", transitionType)
 	}
 
-	//objState := sm.StateSwitchObj.State()
 	objState := stateSwitch.State()
 	for _, tr := range transByType {
 		allow, err := tr.IsAllowedToRun(objState, args)
@@ -54,7 +52,6 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 		}
 	}
 	return errors.Errorf("no condition passed to run transition %s from state %s",
-		//transitionType, sm.StateSwitchObj.State())
 		transitionType, stateSwitch.State())
 }
 
