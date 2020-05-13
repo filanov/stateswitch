@@ -41,10 +41,13 @@ var _ = Describe("AddTransition", func() {
 
 var _ = Describe("Run", func() {
 	var sw *swState
+	var swErr *swError
 	var sm StateMachine
 
 	BeforeEach(func() {
 		sw = &swState{state: stateA}
+		swErr = &swError{state: stateA}
+
 		sm = NewStateMachine()
 		sm.AddTransition(TransitionRule{
 			TransitionType:   ttAToB,
@@ -52,6 +55,7 @@ var _ = Describe("Run", func() {
 			DestinationState: stateB,
 			Condition:        nil,
 			Transition:       nil,
+			PostTransition:   func(stateSwitch StateSwitch, args TransitionArgs) error { return nil },
 		})
 		sm.AddTransition(TransitionRule{
 			TransitionType:   ttNotPermittedAToC,
@@ -81,6 +85,16 @@ var _ = Describe("Run", func() {
 			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return true, nil },
 			Transition:       func(stateSwitch StateSwitch, args TransitionArgs) error { return errors.Errorf("error") },
 		})
+		sm.AddTransition(TransitionRule{
+			TransitionType:   ttAToBPostTransitionErr,
+			SourceStates:     []State{stateA},
+			DestinationState: stateB,
+			Condition:        nil,
+			Transition:       nil,
+			PostTransition: func(stateSwitch StateSwitch, args TransitionArgs) error {
+				return errors.Errorf("post error")
+			},
+		})
 	})
 
 	It("success", func() {
@@ -109,6 +123,14 @@ var _ = Describe("Run", func() {
 		Expect(sm.Run(ttBToA, sw, nil)).Should(HaveOccurred())
 		Expect(sw.state).Should(Equal(stateB))
 	})
+	It("set state error", func() {
+		Expect(sm.Run(ttAToB, swErr, nil)).Should(HaveOccurred())
+		Expect(swErr.state).Should(Equal(stateA))
+	})
+	It("post transition error", func() {
+		Expect(sm.Run(ttAToBPostTransitionErr, sw, nil)).Should(HaveOccurred())
+		Expect(sw.state).Should(Equal(stateB))
+	})
 })
 
 const (
@@ -118,11 +140,12 @@ const (
 )
 
 const (
-	ttAToB             TransitionType = "ttAToB"
-	ttNotPermittedAToC TransitionType = "notPermittedAToC"
-	ttConditionError   TransitionType = "ttConditionError"
-	ttBToC             TransitionType = "ttBToC"
-	ttBToA             TransitionType = "ttBToA"
+	ttAToB                  TransitionType = "ttAToB"
+	ttNotPermittedAToC      TransitionType = "notPermittedAToC"
+	ttConditionError        TransitionType = "ttConditionError"
+	ttBToC                  TransitionType = "ttBToC"
+	ttBToA                  TransitionType = "ttBToA"
+	ttAToBPostTransitionErr TransitionType = "post transition error"
 )
 
 // implement simple state switch object for tests
@@ -137,4 +160,17 @@ func (s *swState) State() State {
 func (s *swState) SetState(state State) error {
 	s.state = state
 	return nil
+}
+
+// implement simple state switch object for tests
+type swError struct {
+	state State
+}
+
+func (s *swError) State() State {
+	return s.state
+}
+
+func (s *swError) SetState(state State) error {
+	return errors.Errorf("error")
 }
