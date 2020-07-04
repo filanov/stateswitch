@@ -2,22 +2,22 @@ package stateswitch
 
 import (
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega"
 )
 
 var _ = Describe("state_test", func() {
 	It("contain", func() {
 		states := States{"a", "b", "c"}
-		Expect(states.Contain("a")).To(BeTrue())
-		Expect(states.Contain("b")).To(BeTrue())
-		Expect(states.Contain("c")).To(BeTrue())
+		gomega.Expect(states.Contain("a")).To(gomega.BeTrue())
+		gomega.Expect(states.Contain("b")).To(gomega.BeTrue())
+		gomega.Expect(states.Contain("c")).To(gomega.BeTrue())
 	})
 	It("not_contain", func() {
 		states := States{"a", "b", "c"}
-		Expect(states.Contain("d")).To(BeFalse())
+		gomega.Expect(states.Contain("d")).To(gomega.BeFalse())
 	})
 	It("empty", func() {
 		states := States{}
-		Expect(states.Contain("a")).To(BeFalse())
+		gomega.Expect(states.Contain("a")).To(gomega.BeFalse())
 	})
 })

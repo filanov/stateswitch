@@ -2,7 +2,7 @@ package stateswitch
 
 import (
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 )
 
@@ -27,15 +27,14 @@ var _ = Describe("AddTransition", func() {
 			Transition:       transitionFunc,
 			Condition:        condition,
 		})
-
-		Expect(len(sm.transitionRules)).Should(Equal(1))
+		gomega.Expect(len(sm.transitionRules)).Should(gomega.Equal(1))
 		rules, ok := sm.transitionRules[transitionType]
-		Expect(ok).To(BeTrue())
-		Expect(len(rules)).Should(Equal(1))
-		Expect(rules[0].Condition).Should(BeAssignableToTypeOf(condition))
-		Expect(rules[0].Transition).Should(BeAssignableToTypeOf(transitionFunc))
-		Expect(rules[0].SourceStates).Should(BeAssignableToTypeOf(srcStates))
-		Expect(rules[0].DestinationState).Should(BeAssignableToTypeOf(dstState))
+		gomega.Expect(ok).To(gomega.BeTrue())
+		gomega.Expect(len(rules)).Should(gomega.Equal(1))
+		gomega.Expect(rules[0].Condition).Should(gomega.BeAssignableToTypeOf(condition))
+		gomega.Expect(rules[0].Transition).Should(gomega.BeAssignableToTypeOf(transitionFunc))
+		gomega.Expect(rules[0].SourceStates).Should(gomega.BeAssignableToTypeOf(srcStates))
+		gomega.Expect(rules[0].DestinationState).Should(gomega.BeAssignableToTypeOf(dstState))
 	})
 })
 
@@ -98,38 +97,38 @@ var _ = Describe("Run", func() {
 	})
 
 	It("success", func() {
-		Expect(sm.Run(ttAToB, sw, nil)).ShouldNot(HaveOccurred())
-		Expect(sw.state).Should(Equal(stateB))
+		gomega.Expect(sm.Run(ttAToB, sw, nil)).ShouldNot(gomega.HaveOccurred())
+		gomega.Expect(sw.state).Should(gomega.Equal(stateB))
 	})
 	It("transition type not found", func() {
-		Expect(sm.Run("invalid transition type", sw, nil)).Should(HaveOccurred())
-		Expect(sw.state).Should(Equal(stateA))
+		gomega.Expect(sm.Run("invalid transition type", sw, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(sw.state).Should(gomega.Equal(stateA))
 	})
 	It("transition not permitted", func() {
-		Expect(sm.Run(ttNotPermittedAToC, sw, nil)).Should(HaveOccurred())
-		Expect(sw.state).Should(Equal(stateA))
+		gomega.Expect(sm.Run(ttNotPermittedAToC, sw, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(sw.state).Should(gomega.Equal(stateA))
 	})
 	It("condition error", func() {
-		Expect(sm.Run(ttConditionError, sw, nil)).Should(HaveOccurred())
-		Expect(sw.state).Should(Equal(stateA))
+		gomega.Expect(sm.Run(ttConditionError, sw, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(sw.state).Should(gomega.Equal(stateA))
 	})
 	It("run transition", func() {
-		Expect(sw.SetState(stateB)).ShouldNot(HaveOccurred())
-		Expect(sm.Run(ttBToC, sw, nil)).ShouldNot(HaveOccurred())
-		Expect(sw.state).Should(Equal(stateC))
+		gomega.Expect(sw.SetState(stateB)).ShouldNot(gomega.HaveOccurred())
+		gomega.Expect(sm.Run(ttBToC, sw, nil)).ShouldNot(gomega.HaveOccurred())
+		gomega.Expect(sw.state).Should(gomega.Equal(stateC))
 	})
 	It("transition error", func() {
-		Expect(sw.SetState(stateB)).ShouldNot(HaveOccurred())
-		Expect(sm.Run(ttBToA, sw, nil)).Should(HaveOccurred())
-		Expect(sw.state).Should(Equal(stateB))
+		gomega.Expect(sw.SetState(stateB)).ShouldNot(gomega.HaveOccurred())
+		gomega.Expect(sm.Run(ttBToA, sw, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(sw.state).Should(gomega.Equal(stateB))
 	})
 	It("set state error", func() {
-		Expect(sm.Run(ttAToB, swErr, nil)).Should(HaveOccurred())
-		Expect(swErr.state).Should(Equal(stateA))
+		gomega.Expect(sm.Run(ttAToB, swErr, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(swErr.state).Should(gomega.Equal(stateA))
 	})
 	It("post transition error", func() {
-		Expect(sm.Run(ttAToBPostTransitionErr, sw, nil)).Should(HaveOccurred())
-		Expect(sw.state).Should(Equal(stateB))
+		gomega.Expect(sm.Run(ttAToBPostTransitionErr, sw, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(sw.state).Should(gomega.Equal(stateB))
 	})
 })
 

@@ -42,9 +42,9 @@ func (th *transitionHandler) IsSufficient(_ stateswitch.StateSwitch, args states
 	return th.hwValidator.IsSufficient(params.hwInfo), nil
 }
 
-func (th *transitionHandler) IsInsufficient(sw stateswitch.StateSwitch, args stateswitch.TransitionArgs) (bool, error) {
-	reply, err := th.IsSufficient(sw, args)
-	return !reply, err
+func (th *transitionHandler) IsConnected(sw stateswitch.StateSwitch, args stateswitch.TransitionArgs) (bool, error) {
+	// Always connected
+	return true, nil
 }
 
 func (th *transitionHandler) PostSetHwInfo(sw stateswitch.StateSwitch, _ stateswitch.TransitionArgs) error {
