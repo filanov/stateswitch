@@ -31,6 +31,7 @@ const (
 
 const (
 	TransitionTypeSetHwInfo = "SetHwInfo"
+	TransitionTypeConnected = "SetConnected"
 	TransitionTypeRegister  = "Register"
 )
 
@@ -50,7 +51,7 @@ func NewHostStateMachine(th *transitionHandler) stateswitch.StateMachine {
 		TransitionType:   TransitionTypeSetHwInfo,
 		SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
 		DestinationState: StateInsufficient,
-		Condition:        th.IsInsufficient,
+		Condition:        stateswitch.And(stateswitch.Not(th.IsSufficient), th.IsConnected),
 		Transition:       th.SetHwInfo,
 		PostTransition:   th.PostSetHwInfo,
 	})
