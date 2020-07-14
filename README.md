@@ -82,6 +82,20 @@ source state and conditions that you define.
 The first transition that will satisfy those requirements will be activated. 
 `Condtion`, `Transition` `PostTranstion` are all optional, the transition may only change the state.
 
+Since `Condtion` represent boolean entity, statewitch provides means to create a combination of these entities from basic 
+boolean operations: `Not`,`And`, `Or`.  For example, rule with complex condition:
+
+```go
+sm.AddTransition(stateswitch.TransitionRule{
+    TransitionType:   TransitionTypeSetHwInfo,
+    SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
+    DestinationState: StatePending,
+    Condition:        And(th.IsConnected, th.HasInventory, Not(th.RoleDefined)),
+    Transition:       th.SetHwInfo,
+    PostTransition:   th.PostSetHwInfo,
+})
+```
+
 Run transition by type, state machine will select the right one for you.
 
 ```go
