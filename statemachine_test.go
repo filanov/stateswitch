@@ -101,11 +101,13 @@ var _ = Describe("Run", func() {
 		gomega.Expect(sw.state).Should(gomega.Equal(stateB))
 	})
 	It("transition type not found", func() {
-		gomega.Expect(sm.Run("invalid transition type", sw, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(errors.Is(sm.Run("invalid transition type", sw, nil), NoMatchForTransitionType)).
+			Should(gomega.BeTrue())
 		gomega.Expect(sw.state).Should(gomega.Equal(stateA))
 	})
 	It("transition not permitted", func() {
-		gomega.Expect(sm.Run(ttNotPermittedAToC, sw, nil)).Should(gomega.HaveOccurred())
+		gomega.Expect(errors.Is(sm.Run(ttNotPermittedAToC, sw, nil), NoConditionPassedToRunTransaction)).
+			Should(gomega.BeTrue())
 		gomega.Expect(sw.state).Should(gomega.Equal(stateA))
 	})
 	It("condition error", func() {

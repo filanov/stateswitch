@@ -4,6 +4,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	NoConditionPassedToRunTransaction = errors.New("no condition found to run transition")
+	NoMatchForTransitionType          = errors.New("no match for transition type")
+)
+
 type StateMachine interface {
 	// AddTransition to state machine
 	AddTransition(rule TransitionRule)
@@ -26,7 +31,7 @@ type stateMachine struct {
 func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwitch, args TransitionArgs) error {
 	transByType, ok := sm.transitionRules[transitionType]
 	if !ok {
-		return errors.Errorf("no match for transition type %s", transitionType)
+		return NoMatchForTransitionType
 	}
 
 	for _, tr := range transByType {
@@ -40,7 +45,6 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 					return err
 				}
 			}
-			//return sm.StateSwitchObj.SetState(tr.DestinationState)
 			if err := stateSwitch.SetState(tr.DestinationState); err != nil {
 				return err
 			}
@@ -50,8 +54,7 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 			return nil
 		}
 	}
-	return errors.Errorf("no condition passed to run transition %s from state %s",
-		transitionType, stateSwitch.State())
+	return NoConditionPassedToRunTransaction
 }
 
 // AddTransition to state machine
