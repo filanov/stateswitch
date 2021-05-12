@@ -82,7 +82,7 @@ source state and conditions that you define.
 The first transition that will satisfy those requirements will be activated. 
 `Condtion`, `Transition` `PostTranstion` are all optional, the transition may only change the state.
 
-Since `Condtion` represent boolean entity, statewitch provides means to create a combination of these entities from basic 
+Since `Condtion` represent boolean entity, stateswitch provides means to create a combination of these entities from basic 
 boolean operations: `Not`,`And`, `Or`.  For example, rule with complex condition:
 
 ```go
