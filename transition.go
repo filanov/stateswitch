@@ -9,6 +9,9 @@ type TransitionRule struct {
 	Condition        Condition
 	Transition       Transition
 	PostTransition   PostTransition
+
+	// Documentation for the transition rule, can be left empty
+	Documentation TransitionRuleDoc
 }
 
 // IsAllowedToRun validate if current state supported, after then check the condition,
