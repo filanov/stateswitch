@@ -1,0 +1,74 @@
+{
+  "transition_rules": [
+    {
+      "transition_type": "Register",
+      "source_states": [
+        "initial"
+      ],
+      "destination_state": "discovering",
+      "name": "Initial registration",
+      "description": "A new server which registers enters our initial discovering state"
+    },
+    {
+      "transition_type": "Register",
+      "source_states": [
+        "discovering",
+        "known",
+        "insufficient"
+      ],
+      "destination_state": "discovering",
+      "name": "Re-registration",
+      "description": "We should ignore repeated registrations from servers that are already registered"
+    },
+    {
+      "transition_type": "SetHwInfo",
+      "source_states": [
+        "discovering",
+        "known",
+        "insufficient"
+      ],
+      "destination_state": "known",
+      "name": "Move to known when receiving good hardware information",
+      "description": "Once we receive hardware information from a server, we can consider it known if the hardware information is sufficient"
+    },
+    {
+      "transition_type": "SetHwInfo",
+      "source_states": [
+        "discovering",
+        "known",
+        "insufficient"
+      ],
+      "destination_state": "insufficient",
+      "name": "Move to insufficient when receiving bad hardware information",
+      "description": "Once we receive hardware infomration from a server, we consider the server to be insufficient if the hardware is insufficient"
+    }
+  ],
+  "states": {
+    "discovering": {
+      "name": "Discovering",
+      "description": "Indicates that the server has registered but we still don't know anything about its hardware"
+    },
+    "initial": {
+      "name": "Initial",
+      "description": "The initial state of the state machine. This is a synthetic state that is not actually part of the state machine. It appears in documentation when transition rules hold a single source state that is an empty string"
+    },
+    "insufficient": {
+      "name": "Insufficient",
+      "description": "Indicates that the server has sufficient hardware"
+    },
+    "known": {
+      "name": "Discovering",
+      "description": "Indicates that the server has registered but we still don't know anything about its hardware"
+    }
+  },
+  "transition_types": {
+    "Register": {
+      "name": "Register",
+      "description": "Triggered when a server registers"
+    },
+    "SetHwInfo": {
+      "name": "Set hardware info",
+      "description": "Triggered for every hardware information change"
+    }
+  }
+}

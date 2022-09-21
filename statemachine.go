@@ -14,17 +14,24 @@ type StateMachine interface {
 	AddTransition(rule TransitionRule)
 	// Run transition by type
 	Run(transitionType TransitionType, stateSwitch StateSwitch, args TransitionArgs) error
+
+	StateMachineDocumentation
 }
 
 // Create new default state machine
 func NewStateMachine() *stateMachine {
-	return &stateMachine{
+	sm := stateMachine{
 		transitionRules: map[TransitionType]TransitionRules{},
 	}
+
+	initStateMachineDocumentation(&sm)
+
+	return &sm
 }
 
 type stateMachine struct {
 	transitionRules map[TransitionType]TransitionRules
+	stateMachineDocumentation
 }
 
 // Run transition by type, will search for the first transition that will pass a condition.
