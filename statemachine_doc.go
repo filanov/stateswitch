@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+
+	"github.com/emicklei/dot"
 )
 
 type StateMachineDocumentation interface {
@@ -22,6 +24,9 @@ type StateMachineDocumentation interface {
 	// can be used to generate documentation or to generate a state machine
 	// diagram
 	AsJSON() ([]byte, error)
+
+	// Generates and returns a *dot.Graph type that can then be rendered.
+	AsDotGraph() *dot.Graph
 }
 
 type stateMachineDocumentation struct {
@@ -98,6 +103,43 @@ func (sm *stateMachine) DescribeState(state State, stateDocumentation StateDoc) 
 
 func (sm *stateMachine) DescribeTransitionType(transitionType TransitionType, transitionTypeDocumentation TransitionTypeDoc) {
 	sm.transitionTypeDocs[transitionType] = transitionTypeDocumentation
+}
+
+// AsDotGraph identifies the nodes and edges in the transitionrules and
+// returns a *dot.Graph type from the package https://github.com/emicklei/dot.
+//
+// The returned graph can then be rendered into the Graphviz dot form
+// by invoking .String() on the returned *dot.Graph value.
+func (sm *stateMachine) AsDotGraph() *dot.Graph {
+	g := dot.NewGraph(dot.Directed)
+
+	// unique node map
+	nodes := map[string]dot.Node{}
+
+	// collect graph nodes and edges from transition rules
+	for trType, trRules := range sm.transitionRules {
+		for _, trRule := range trRules {
+			// add destination state as to node
+			toNode := string(trRule.DestinationState)
+			_, exists := nodes[toNode]
+			if !exists {
+				nodes[toNode] = g.Node(toNode)
+			}
+
+			// add source states as from nodes
+			for _, sourceState := range trRule.SourceStates {
+				fromNode := string(sourceState)
+				_, exists := nodes[fromNode]
+				if !exists {
+					nodes[fromNode] = g.Node(fromNode)
+				}
+
+				g.Edge(nodes[fromNode], nodes[toNode], string(trType))
+			}
+		}
+	}
+
+	return g
 }
 
 func (sm *stateMachine) AsJSON() ([]byte, error) {
