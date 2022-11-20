@@ -13,7 +13,7 @@ var _ = Describe("State machine documentation", func() {
 		srcStates := States{"StateA", "StateB"}
 		dstState := State("StateC")
 
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   transitionType,
 			SourceStates:     []State{""},
 			DestinationState: dstState,
@@ -25,7 +25,7 @@ var _ = Describe("State machine documentation", func() {
 			},
 		})
 
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   transitionType,
 			SourceStates:     srcStates,
 			DestinationState: dstState,

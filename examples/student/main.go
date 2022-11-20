@@ -80,7 +80,7 @@ func (stm *studentMachine) SetGrade(s *Student, grade int) error {
 func NewStudentMachine() *studentMachine {
 	sm := stateswitch.NewStateMachine()
 
-	sm.AddTransition(stateswitch.TransitionRule{
+	sm.AddTransitionRule(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeSetGrade,
 		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
 		DestinationState: StatePassed,
@@ -88,7 +88,7 @@ func NewStudentMachine() *studentMachine {
 		Transition:       SetGradeTransition,
 	})
 
-	sm.AddTransition(stateswitch.TransitionRule{
+	sm.AddTransitionRule(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeSetGrade,
 		SourceStates:     []stateswitch.State{StatePending, StateFailed, StatePassed},
 		DestinationState: StateFailed,
