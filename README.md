@@ -10,7 +10,7 @@ A simple and clear way to create and represent state machine.
 sm := stateswitch.NewStateMachine()
 
 // Define the state machine rules (and optionally document each rule)
-sm.AddTransition(stateswitch.TransitionRule{
+sm.AddTransitionRule(stateswitch.TransitionRule{
     TransitionType:   TransitionTypeSetHwInfo,
     SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
     DestinationState: StateKnown,
@@ -22,7 +22,7 @@ sm.AddTransition(stateswitch.TransitionRule{
         Description: "Once we receive hardware information from a server, we can consider it known if the hardware information is sufficient",
     },
 })
-sm.AddTransition(stateswitch.TransitionRule{
+sm.AddTransitionRule(stateswitch.TransitionRule{
     TransitionType:   TransitionTypeSetHwInfo,
     SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
     DestinationState: StateInsufficient,
@@ -34,7 +34,7 @@ sm.AddTransition(stateswitch.TransitionRule{
         Description: "Once we receive hardware infomration from a server, we consider the server to be insufficient if the hardware is insufficient",
     },
 })
-sm.AddTransition(stateswitch.TransitionRule{
+sm.AddTransitionRule(stateswitch.TransitionRule{
     TransitionType:   TransitionTypeRegister,
     SourceStates:     stateswitch.States{""},
     DestinationState: StateDiscovering,
@@ -46,7 +46,7 @@ sm.AddTransition(stateswitch.TransitionRule{
         Description: "A new server which registers enters our initial discovering state",
     },
 })
-sm.AddTransition(stateswitch.TransitionRule{
+sm.AddTransitionRule(stateswitch.TransitionRule{
     TransitionType:   TransitionTypeRegister,
     SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
     DestinationState: StateDiscovering,
@@ -106,7 +106,7 @@ sm := stateswitch.NewStateMachine()
 Add transitions with the expected behavior 
 
 ```go
-sm.AddTransition(stateswitch.TransitionRule{
+sm.AddTransitionRule(stateswitch.TransitionRule{
 	TransitionType:   TransitionTypeSetHwInfo,
 	SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
 	DestinationState: StateInsufficient,
@@ -129,7 +129,7 @@ Since `Condtion` represent boolean entity, stateswitch provides means to create 
 boolean operations: `Not`,`And`, `Or`.  For example, rule with complex condition:
 
 ```go
-sm.AddTransition(stateswitch.TransitionRule{
+sm.AddTransitionRule(stateswitch.TransitionRule{
     TransitionType:   TransitionTypeSetHwInfo,
     SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
     DestinationState: StatePending,

@@ -38,7 +38,7 @@ const (
 func NewHostStateMachine(th *transitionHandler) stateswitch.StateMachine {
 	sm := stateswitch.NewStateMachine()
 
-	sm.AddTransition(stateswitch.TransitionRule{
+	sm.AddTransitionRule(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeSetHwInfo,
 		SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
 		DestinationState: StateKnown,
@@ -47,7 +47,7 @@ func NewHostStateMachine(th *transitionHandler) stateswitch.StateMachine {
 		PostTransition:   th.PostSetHwInfo,
 	})
 
-	sm.AddTransition(stateswitch.TransitionRule{
+	sm.AddTransitionRule(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeSetHwInfo,
 		SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
 		DestinationState: StateInsufficient,
@@ -56,7 +56,7 @@ func NewHostStateMachine(th *transitionHandler) stateswitch.StateMachine {
 		PostTransition:   th.PostSetHwInfo,
 	})
 
-	sm.AddTransition(stateswitch.TransitionRule{
+	sm.AddTransitionRule(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeRegister,
 		SourceStates:     stateswitch.States{""},
 		DestinationState: StateDiscovering,
@@ -65,7 +65,7 @@ func NewHostStateMachine(th *transitionHandler) stateswitch.StateMachine {
 		PostTransition:   th.RegisterNew,
 	})
 
-	sm.AddTransition(stateswitch.TransitionRule{
+	sm.AddTransitionRule(stateswitch.TransitionRule{
 		TransitionType:   TransitionTypeRegister,
 		SourceStates:     stateswitch.States{StateDiscovering, StateKnown, StateInsufficient},
 		DestinationState: StateDiscovering,

@@ -6,8 +6,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-var _ = Describe("AddTransition", func() {
-	It("AddTransition", func() {
+var _ = Describe("AddTransitionRule", func() {
+	It("AddTransitionRule", func() {
 		sm := NewStateMachine()
 
 		transitionType := TransitionType("TransitionType")
@@ -20,7 +20,7 @@ var _ = Describe("AddTransition", func() {
 			return true, nil
 		}
 
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   transitionType,
 			SourceStates:     srcStates,
 			DestinationState: dstState,
@@ -48,7 +48,7 @@ var _ = Describe("Run", func() {
 		swErr = &swError{state: stateA}
 
 		sm = NewStateMachine()
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   ttAToB,
 			SourceStates:     []State{stateA},
 			DestinationState: stateB,
@@ -56,35 +56,35 @@ var _ = Describe("Run", func() {
 			Transition:       nil,
 			PostTransition:   func(stateSwitch StateSwitch, args TransitionArgs) error { return nil },
 		})
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   ttNotPermittedAToC,
 			SourceStates:     []State{stateA},
 			DestinationState: stateC,
 			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return false, nil },
 			Transition:       nil,
 		})
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   ttConditionError,
 			SourceStates:     []State{stateA, stateB},
 			DestinationState: stateC,
 			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return false, errors.Errorf("error") },
 			Transition:       nil,
 		})
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   ttBToC,
 			SourceStates:     []State{stateB},
 			DestinationState: stateC,
 			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return true, nil },
 			Transition:       func(stateSwitch StateSwitch, args TransitionArgs) error { return nil },
 		})
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   ttBToA,
 			SourceStates:     []State{stateB},
 			DestinationState: stateA,
 			Condition:        func(stateSwitch StateSwitch, args TransitionArgs) (bool, error) { return true, nil },
 			Transition:       func(stateSwitch StateSwitch, args TransitionArgs) error { return errors.Errorf("error") },
 		})
-		sm.AddTransition(TransitionRule{
+		sm.AddTransitionRule(TransitionRule{
 			TransitionType:   ttAToBPostTransitionErr,
 			SourceStates:     []State{stateA},
 			DestinationState: stateB,

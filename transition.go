@@ -1,7 +1,11 @@
 package stateswitch
 
+// TransitionType reprents an event that can cause a state transition
 type TransitionType string
 
+// TransitionRule is a rule that defines the required source states and
+// conditions needed to move to a particular destination state when a
+// particular transition type happens
 type TransitionRule struct {
 	TransitionType   TransitionType
 	SourceStates     States

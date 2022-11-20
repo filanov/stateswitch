@@ -10,7 +10,9 @@ var (
 )
 
 type StateMachine interface {
-	// AddTransition to state machine
+	// AddTransitionRule adds a new transition rule to the state machine
+	AddTransitionRule(rule TransitionRule)
+	// AddTransition is a deprecated method, use AddTransitionRule instead
 	AddTransition(rule TransitionRule)
 	// Run transition by type
 	Run(transitionType TransitionType, stateSwitch StateSwitch, args TransitionArgs) error
@@ -64,7 +66,10 @@ func (sm *stateMachine) Run(transitionType TransitionType, stateSwitch StateSwit
 	return NoConditionPassedToRunTransaction
 }
 
-// AddTransition to state machine
 func (sm *stateMachine) AddTransition(rule TransitionRule) {
+	sm.AddTransitionRule(rule)
+}
+
+func (sm *stateMachine) AddTransitionRule(rule TransitionRule) {
 	sm.transitionRules[rule.TransitionType] = append(sm.transitionRules[rule.TransitionType], rule)
 }
